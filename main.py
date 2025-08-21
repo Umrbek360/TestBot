@@ -24,7 +24,7 @@ def main():
     
     # Add handlers
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(button_handler, pattern="^(test|account|admin)$"))
+    application.add_handler(CallbackQueryHandler(button_handler, pattern="^(test|account|admin|back_main)$"))
     application.add_handler(CallbackQueryHandler(test_start_handler, pattern="^test_"))
     application.add_handler(CallbackQueryHandler(answer_handler, pattern="^answer_"))
     application.add_handler(CallbackQueryHandler(account_handler, pattern="^account_"))

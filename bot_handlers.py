@@ -37,6 +37,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await show_account_info(query)
     elif query.data == "admin":
         await show_admin_panel(query)
+    elif query.data == "back_main":
+        await back_to_main(query)
 
 async def show_subjects(query) -> None:
     """Show available subjects for testing."""
