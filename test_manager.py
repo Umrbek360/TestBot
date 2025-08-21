@@ -2,12 +2,13 @@ import json
 import os
 from typing import Dict, List, Any, Optional
 
+
 class TestManager:
     def __init__(self, questions_file: str = "questions.json"):
         self.questions_file = questions_file
         self.questions_data = self._load_questions()
         self.active_sessions = {}  # Store active test sessions
-    
+
     def _load_questions(self) -> Dict[str, Any]:
         """Load questions data from JSON file."""
         if os.path.exists(self.questions_file):
@@ -17,13 +18,13 @@ class TestManager:
             except (json.JSONDecodeError, IOError):
                 return self._create_default_questions()
         return self._create_default_questions()
-    
+
     def _create_default_questions(self) -> Dict[str, Any]:
         """Create default questions structure if file doesn't exist."""
         default_data = {
             "subjects": {
                 "math": "Matematika",
-                "physics": "Fizika", 
+                "physics": "Fizika",
                 "chemistry": "Kimyo",
                 "biology": "Biologiya"
             },
@@ -238,28 +239,28 @@ class TestManager:
                 ]
             }
         }
-        
+
         # Save default questions to file
         try:
             with open(self.questions_file, 'w', encoding='utf-8') as f:
                 json.dump(default_data, f, ensure_ascii=False, indent=2)
         except IOError as e:
             print(f"Error saving default questions: {e}")
-        
+
         return default_data
-    
+
     def get_subjects(self) -> Dict[str, str]:
         """Get all available subjects."""
         return self.questions_data.get("subjects", {})
-    
+
     def get_question(self, subject_id: str, question_index: int) -> Optional[Dict[str, Any]]:
         """Get a specific question for a subject."""
         questions = self.questions_data.get("questions", {}).get(subject_id, [])
-        
+
         if 0 <= question_index < len(questions):
             return questions[question_index]
         return None
-    
+
     def start_test(self, user_id: int, subject_id: str) -> None:
         """Start a new test session for a user."""
         session_key = f"{user_id}_{subject_id}"
@@ -270,54 +271,54 @@ class TestManager:
             "answers": [],
             "start_time": None
         }
-    
+
     def record_answer(self, user_id: int, subject_id: str, question_index: int, selected_option: int) -> None:
         """Record user's answer for a question."""
         session_key = f"{user_id}_{subject_id}"
-        
+
         if session_key not in self.active_sessions:
             self.start_test(user_id, subject_id)
-        
+
         session = self.active_sessions[session_key]
-        
+
         # Ensure answers list is long enough
         while len(session["answers"]) <= question_index:
             session["answers"].append(-1)
-        
+
         session["answers"][question_index] = selected_option
-    
+
     def calculate_results(self, user_id: int, subject_id: str) -> Dict[str, Any]:
         """Calculate test results for a user."""
         session_key = f"{user_id}_{subject_id}"
-        
+
         if session_key not in self.active_sessions:
             return {"correct": 0, "total": 0, "percentage": 0}
-        
+
         session = self.active_sessions[session_key]
         answers = session["answers"]
         questions = self.questions_data.get("questions", {}).get(subject_id, [])
-        
+
         correct_count = 0
         total_questions = min(len(answers), len(questions), 10)
-        
+
         for i in range(total_questions):
             if i < len(questions) and i < len(answers):
                 if questions[i]["correct"] == answers[i]:
                     correct_count += 1
-        
+
         percentage = (correct_count / total_questions * 100) if total_questions > 0 else 0
-        
+
         # Clean up session
         if session_key in self.active_sessions:
             del self.active_sessions[session_key]
-        
+
         return {
             "correct": correct_count,
             "total": total_questions,
             "percentage": percentage,
             "answers": answers[:total_questions]
         }
-    
+
     def get_correct_answer(self, subject_id: str, question_index: int) -> int:
         """Get the correct answer index for a question."""
         question = self.get_question(subject_id, question_index)
